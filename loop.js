@@ -70,7 +70,6 @@ Object.assign(Loop.prototype, {
     // fps throttle - begin
     if( timestamp < this.lastFrameTime + this.minFrameTime ) {
       this.rafId = requestAnimationFrame( this.loop );
-      console.log( 'frame skip' );
       return;
     }
     // fps throttle - end
