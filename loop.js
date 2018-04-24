@@ -6,7 +6,7 @@ Object.assign(Loop.prototype, {
     var nope = function(){};
     this.onUpdate = cfg.handleUpdate || nope;
     this.onRender = cfg.handleRender || nope;
-    var timestep = cfg.timestep || 66;
+    var timestep = cfg.timestep || 60;
     var maxFps = cfg.maxFps || 66;
 
     // consts
