@@ -1,17 +1,14 @@
-var Loop = function(cfg){ this.setConfig(cfg); };
+var Loop = function(cfg){ this.init(cfg); };
 Object.assign(Loop.prototype, {
 
-  setConfig: function(cfg) {
+  init: function(cfg) {
     // config
     var nope = function(){};
     this.onUpdate = cfg.handleUpdate || nope;
     this.onRender = cfg.handleRender || nope;
-    var timestep = cfg.timestep || 60;
-    var maxFps = cfg.maxFps || 66;
-
-    // consts
-    this.timestep = 1000 / timestep;
-    this.minFrameTime = 1000 / maxFps;
+    this.onPanic = cfg.handlePanic || nope;
+    this.timestep = cfg.timestep || ( 1000 / 60 );
+    this.minFrameTime = 1000 / ( cfg.fpsLimit || 66 );
 
     // vars
     this.started = false;
@@ -109,6 +106,7 @@ Object.assign(Loop.prototype, {
   panic: function() {
     console.warn('panic');
     this.delta = 0;
+    this.onPanic();
   }
 
 });
