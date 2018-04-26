@@ -9,6 +9,7 @@ Object.assign(Loop.prototype, {
     this.onPanic = cfg.handlePanic || nope;
     this.timestep = cfg.timestep || ( 1000 / 60 );
     this.minFrameTime = 1000 / ( cfg.fpsLimit || 66 );
+    this.fpsMeter = cfg.fpsMeter || true;
 
     // vars
     this.started = false;
@@ -18,7 +19,7 @@ Object.assign(Loop.prototype, {
     this.lastFpsUpdate = 0;
     this.framesThisSecond = 0;
     this.delta = 0;
-    this.fps = 60;
+    this.fps = this.fpsMeter ? 0 : null;
 
     // bind this
     this.start = this.start.bind(this);
@@ -75,13 +76,16 @@ Object.assign(Loop.prototype, {
     this.lastFrameTime = timestamp;
 
     // fps meter - begin
-    if( timestamp > this.lastFpsUpdate + 1000 ) { // update every second
-      this.fps = 0.2 * this.framesThisSecond + 0.8 * this.fps; // compute the new fps
+    if( this.fpsMeter ) {
+      if( timestamp > this.lastFpsUpdate + 1000 ) { // update every second
+        // this.fps = 0.4 * this.framesThisSecond + 0.6 * this.fps; // compute the new fps
+        this.fps = this.framesThisSecond;
 
-      this.lastFpsUpdate = timestamp;
-      this.framesThisSecond = 0;
+        this.lastFpsUpdate = timestamp;
+        this.framesThisSecond = 0;
+      }
+      this.framesThisSecond++;
     }
-    this.framesThisSecond++;
     // fps meter - end
 
     // panic handler loop - begin
