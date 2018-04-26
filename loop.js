@@ -7,6 +7,7 @@ Object.assign(Loop.prototype, {
     this.onUpdate = cfg.handleUpdate || nope;
     this.onRender = cfg.handleRender || nope;
     this.onPanic = cfg.handlePanic || nope;
+    this.onRawFrame = cfg.handleRawFrame || null;
     this.timestep = cfg.timestep || ( 1000 / 60 );
     this.minFrameTime = 1000 / ( cfg.fpsLimit || 66 );
     this.fpsMeter = cfg.fpsMeter || true;
@@ -32,8 +33,8 @@ Object.assign(Loop.prototype, {
     this.onUpdate(delta);
   },
 
-  render: function(interpol) {
-    this.onRender(interpol, this.fps);
+  render: function(interp) {
+    this.onRender(interp, this.fps);
   },
 
   start: function() {
@@ -65,6 +66,14 @@ Object.assign(Loop.prototype, {
   },
 
   loop: function(timestamp) {
+    // raw frame mode - begin
+    if( this.onRawFrame !== null ) {
+      this.onRawFrame(timestamp);
+      this.rafId = requestAnimationFrame( this.loop );
+      return;
+    }
+    // raw frame mode - end
+
     // fps throttle - begin
     if( timestamp < this.lastFrameTime + this.minFrameTime ) {
       this.rafId = requestAnimationFrame( this.loop );
