@@ -1,6 +1,6 @@
 /*!
  * GameLoop
- * version: 2018.05.10
+ * version: 2018.08.26
  * author: dobrapyra
  * url: https://github.com/dobrapyra/GameLoop
  */
