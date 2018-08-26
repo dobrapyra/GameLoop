@@ -1,17 +1,22 @@
-var Loop = function(cfg){ this.setConfig(cfg); };
+/*!
+ * GameLoop
+ * version: 2018.05.10
+ * author: dobrapyra
+ * url: https://github.com/dobrapyra/GameLoop
+ */
+var Loop = function(cfg){ this.init(cfg); };
 Object.assign(Loop.prototype, {
 
-  setConfig: function(cfg) {
+  init: function(cfg) {
     // config
     var nope = function(){};
     this.onUpdate = cfg.handleUpdate || nope;
     this.onRender = cfg.handleRender || nope;
-    var timestep = cfg.timestep || 66;
-    var maxFps = cfg.maxFps || 66;
-
-    // consts
-    this.timestep = 1000 / timestep;
-    this.minFrameTime = 1000 / maxFps;
+    this.onPanic = cfg.handlePanic || nope;
+    this.onRawFrame = cfg.handleRawFrame || null;
+    this.timestep = cfg.timestep || ( 1000 / 60 );
+    this.minFrameTime = 1000 / ( cfg.fpsLimit || 66 );
+    this.fpsMeter = cfg.fpsMeter || true;
 
     // vars
     this.started = false;
@@ -21,7 +26,7 @@ Object.assign(Loop.prototype, {
     this.lastFpsUpdate = 0;
     this.framesThisSecond = 0;
     this.delta = 0;
-    this.fps = 60;
+    this.fps = this.fpsMeter ? 0 : null;
 
     // bind this
     this.start = this.start.bind(this);
@@ -34,8 +39,8 @@ Object.assign(Loop.prototype, {
     this.onUpdate(delta);
   },
 
-  render: function(interpol) {
-    this.onRender(interpol, this.fps);
+  render: function(interp) {
+    this.onRender(interp, this.fps);
   },
 
   start: function() {
@@ -67,10 +72,17 @@ Object.assign(Loop.prototype, {
   },
 
   loop: function(timestamp) {
+    // raw frame mode - begin
+    if( this.onRawFrame !== null ) {
+      this.onRawFrame(timestamp);
+      this.rafId = requestAnimationFrame( this.loop );
+      return;
+    }
+    // raw frame mode - end
+
     // fps throttle - begin
     if( timestamp < this.lastFrameTime + this.minFrameTime ) {
       this.rafId = requestAnimationFrame( this.loop );
-      console.log( 'frame skip' );
       return;
     }
     // fps throttle - end
@@ -79,13 +91,16 @@ Object.assign(Loop.prototype, {
     this.lastFrameTime = timestamp;
 
     // fps meter - begin
-    if( timestamp > this.lastFpsUpdate + 1000 ) { // update every second
-      this.fps = 0.2 * this.framesThisSecond + 0.8 * this.fps; // compute the new fps
+    if( this.fpsMeter ) {
+      if( timestamp > this.lastFpsUpdate + 1000 ) { // update every second
+        // this.fps = 0.4 * this.framesThisSecond + 0.6 * this.fps; // compute the new fps
+        this.fps = this.framesThisSecond;
 
-      this.lastFpsUpdate = timestamp;
-      this.framesThisSecond = 0;
+        this.lastFpsUpdate = timestamp;
+        this.framesThisSecond = 0;
+      }
+      this.framesThisSecond++;
     }
-    this.framesThisSecond++;
     // fps meter - end
 
     // panic handler loop - begin
@@ -110,6 +125,7 @@ Object.assign(Loop.prototype, {
   panic: function() {
     console.warn('panic');
     this.delta = 0;
+    this.onPanic();
   }
 
 });
