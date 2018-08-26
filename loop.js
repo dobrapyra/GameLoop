@@ -2,8 +2,10 @@ var Loop = function(cfg){ this.init(cfg); };
 Object.assign(Loop.prototype, {
 
   init: function(cfg) {
-    // config
+    // const noop
     var noop = function(){};
+
+    // #region config
     this.onUpdate = cfg.handleUpdate || noop;
     this.onRender = cfg.handleRender || noop;
     this.onPanic = cfg.handlePanic || noop;
@@ -11,8 +13,9 @@ Object.assign(Loop.prototype, {
     this.timestep = cfg.timestep || ( 1000 / 60 );
     this.minFrameTime = 1000 / ( cfg.fpsLimit || 66 );
     this.fpsMeter = cfg.fpsMeter || true;
+    // #endregion config
 
-    // vars
+    // #region vars
     this.started = false;
     this.running = false;
     this.rafId = null;
@@ -21,12 +24,14 @@ Object.assign(Loop.prototype, {
     this.framesThisSecond = 0;
     this.delta = 0;
     this.fps = this.fpsMeter ? 0 : null;
+    // #endregion vars
 
-    // bind this
+    // #region bind this
     this.start = this.start.bind(this);
     this.stop = this.stop.bind(this);
     this.initLoop = this.initLoop.bind(this);
     this.loop = this.loop.bind(this);
+    // #endregion bind this
   },
 
   update: function(delta) {
@@ -56,35 +61,36 @@ Object.assign(Loop.prototype, {
     this.render(1); // initial render
     this.running = true;
 
-    // reset some vars
+    // #region reset some vars
     this.lastFrameTime = timestamp;
     this.lastFpsUpdate = timestamp;
     this.framesThisSecond = 0;
+    // #endregion reset some vars
 
     // first standard frame
     this.rafId = requestAnimationFrame( this.loop );
   },
 
   loop: function(timestamp) {
-    // raw frame mode - begin
+    // #region raw frame mode
     if( this.onRawFrame !== null ) {
       this.onRawFrame(timestamp);
       this.rafId = requestAnimationFrame( this.loop );
       return;
     }
-    // raw frame mode - end
+    // #endregion raw frame mode
 
-    // fps throttle - begin
+    // #region fps throttle
     if( timestamp < this.lastFrameTime + this.minFrameTime ) {
       this.rafId = requestAnimationFrame( this.loop );
       return;
     }
-    // fps throttle - end
+    // #endregion fps throttle
 
     this.delta += timestamp - this.lastFrameTime;
     this.lastFrameTime = timestamp;
 
-    // fps meter - begin
+    // #region fps meter
     if( this.fpsMeter ) {
       if( timestamp > this.lastFpsUpdate + 1000 ) { // update every second
         // this.fps = 0.4 * this.framesThisSecond + 0.6 * this.fps; // compute the new fps
@@ -95,9 +101,9 @@ Object.assign(Loop.prototype, {
       }
       this.framesThisSecond++;
     }
-    // fps meter - end
+    // #endregion fps meter
 
-    // panic handler loop - begin
+    // #region panic handler loop
     var updateSteps = 0;
     while( this.delta >= this.timestep ) {
       this.update( this.timestep );
@@ -108,7 +114,7 @@ Object.assign(Loop.prototype, {
         break;
       }
     }
-    // panic handler loop - end
+    // #endregion panic handler loop
 
     this.render( this.delta / this.timestep );
 
