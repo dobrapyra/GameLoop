@@ -3,10 +3,10 @@ Object.assign(Loop.prototype, {
 
   init: function(cfg) {
     // config
-    var nope = function(){};
-    this.onUpdate = cfg.handleUpdate || nope;
-    this.onRender = cfg.handleRender || nope;
-    this.onPanic = cfg.handlePanic || nope;
+    var noop = function(){};
+    this.onUpdate = cfg.handleUpdate || noop;
+    this.onRender = cfg.handleRender || noop;
+    this.onPanic = cfg.handlePanic || noop;
     this.onRawFrame = cfg.handleRawFrame || null;
     this.timestep = cfg.timestep || ( 1000 / 60 );
     this.minFrameTime = 1000 / ( cfg.fpsLimit || 66 );
